@@ -1,0 +1,9 @@
+beeper/beeper
+gpg-keys/*
+!gpg-keys/.gitkeep
+config/docker-compose.local.yml
+config/pi-notifier
+config/.env
+config/custom-bin/*
+!config/custom-bin/.gitkeep
+!config/custom-bin/github-ffmerge

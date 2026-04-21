@@ -1,0 +1,88 @@
+services:
+  socket-proxy:
+    image: wollomatic/socket-proxy:1
+    container_name: pi-socket-proxy
+    command:
+      - '-listenip=0.0.0.0'
+      - '-allowfrom=pi-filter-proxy'
+      - '-allowGET=/(v1\..{1,2}/)?(version|info|containers(/.*)?|images(/.*)?|networks(/.*)?|volumes(/.*)?|build.*|exec/.*|events.*|_ping)'
+      - '-allowPOST=/(v1\..{1,2}/)?(containers(/.*)?|images(/.*)?|networks(/.*)?|volumes(/.*)?|build.*|exec/.*|_ping)'
+      - '-allowPUT=/(v1\..{1,2}/)?(containers(/.*)?)'
+      - '-allowDELETE=/(v1\..{1,2}/)?(containers(/.*)?|images(/.*)?|networks(/.*)?|volumes(/.*)?)'
+      - '-allowHEAD=/(v1\..{1,2}/)?(containers(/.*)?|images(/.*)?|_ping)'
+      - '-allowbindmountfrom=${ALLOWED_BIND_MOUNTS}'
+      - '-loglevel=INFO'
+    user: '0'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - pi-internal-net
+    read_only: true
+    tmpfs:
+      - /run
+    restart: unless-stopped
+
+  filter-proxy:
+    container_name: pi-filter-proxy
+    build:
+      context: ./docker-filter-proxy
+    environment:
+      DOCKER_FILTER_UPSTREAM: http://pi-socket-proxy:2375
+      DOCKER_FILTER_LISTEN: 0.0.0.0:2375
+    depends_on:
+      - socket-proxy
+    networks:
+      - pi-internal-net
+      - pi-net
+    read_only: true
+    restart: unless-stopped
+
+  pi:
+    container_name: pi-docker
+    init: true
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        HOST_UID: ${HOST_UID}
+        HOST_USER: ${HOST_USER}
+        HOST_HOME: ${HOST_HOME}
+        GO_VERSION: ${GO_VERSION}
+        CONTAINER_SHELL: ${CONTAINER_SHELL:-/bin/bash}
+        EXTRA_PACKAGES: ${EXTRA_PACKAGES:-}
+        PI_VERSION: ${PI_VERSION:-}
+    volumes:
+      - ${PI_CODING_AGENT_DIR_HOST}:${PI_CODING_AGENT_DIR_HOST}
+      - ${GOPATH}/pkg:${HOST_HOME}/go/pkg
+      - ./gpg-keys:/run/gpg-keys:ro
+      - ./config/pi-notifier:/usr/local/bin/pi-notifier:ro
+      - ./config/custom-bin:/usr/local/custom-bin:ro
+    working_dir: ${HOST_HOME}
+    environment:
+      DOCKER_HOST: tcp://pi-filter-proxy:2375
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      GIT_USER_NAME: ${GIT_USER_NAME:-}
+      GIT_USER_EMAIL: ${GIT_USER_EMAIL:-}
+      GIT_PROTECTED_BRANCHES: ${GIT_PROTECTED_BRANCHES:-main master}
+      GOPRIVATE: ${GOPRIVATE:-}
+      GONOSUMDB: ${GONOSUMDB:-}
+      GOPATH: ${HOST_HOME}/go
+      HOST_USER: ${HOST_USER}
+      HOST_HOME: ${HOST_HOME}
+      PI_CODING_AGENT_DIR: ${PI_CODING_AGENT_DIR_HOST}
+      PI_PACKAGE_DIR: ${PI_PACKAGE_DIR:-}
+      SSH_RELAY_HOST: ${SSH_RELAY_HOST:-}
+      SSH_RELAY_PORT: ${SSH_RELAY_PORT:-}
+      SSH_AUTH_SOCK: /tmp/ssh-agent.sock
+      CONTAINER_SHELL: ${CONTAINER_SHELL:-/bin/bash}
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
+    mem_limit: ${DOCKER_MEMORY_LIMIT:-0}
+    depends_on:
+      - filter-proxy
+    networks:
+      - pi-net
+
+networks:
+  pi-internal-net:
+  pi-net:

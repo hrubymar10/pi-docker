@@ -1,0 +1,10 @@
+#!/bin/bash
+# VS Code wrapper for the pi-vscode extension.
+#
+# The extension launches the configured binary as the terminal shell and passes
+# prompts via argv (shellArgs). We simply forward everything to pi-docker so pi
+# runs inside the container instead of on the host.
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exec "$SCRIPT_DIR/pi-docker" "$@"

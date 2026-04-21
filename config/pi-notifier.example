@@ -1,0 +1,4 @@
+#!/bin/sh
+# Optional host notification hook copied into the container.
+# Replace with your own sound/desktop notification logic.
+exit 0
