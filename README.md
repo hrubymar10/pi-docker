@@ -193,12 +193,21 @@ Optional host-side HTTP server (`beeper/main.go`) that plays a sound when called
 - `BEEPER_BIND` — `host:port` to listen on. Default `127.0.0.1:9999`. Host must be an IP literal (no hostnames). Set to `0.0.0.0:9999` to expose on all interfaces.
 - `BEEPER_ALLOW` — comma-separated list of source IPs / CIDRs that may call the beeper. Default `127.0.0.0/8`. Bare IPs are normalised to `/32` (v4) / `/128` (v6). Requests from anywhere else get a `403`.
 
-For container access via `host.docker.internal`, the defaults are sufficient on Docker Desktop (it forwards to host loopback). For VPN clients or other remote access, widen both:
+For container access via `host.docker.internal`, the defaults are sufficient on Docker Desktop / OrbStack (it forwards to host loopback). For VPN clients or other remote access, widen both:
 
 ```bash
 export BEEPER_BIND=0.0.0.0:9999
 export BEEPER_ALLOW=127.0.0.0/8,172.28.47.0/24
 ```
+
+**Linux note:** on Linux Docker Engine, `host.docker.internal` resolves to the Docker bridge gateway (typically in `172.17.0.0/16` or `172.16.0.0/12`), not host loopback. The default `BEEPER_ALLOW=127.0.0.0/8` will block those requests. Add the bridge subnet to allow container→host beeper calls:
+
+```bash
+export BEEPER_BIND=0.0.0.0:9999
+export BEEPER_ALLOW=127.0.0.0/8,172.17.0.0/16   # adjust to your bridge subnet
+```
+
+Note: `beeper/main.go` calls `afplay` (macOS only) — sound playback does not work on Linux, but the HTTP endpoint still responds.
 
 `X-Forwarded-For` is intentionally not honoured — this is a direct-connection service.
 
