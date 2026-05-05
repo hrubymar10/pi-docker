@@ -172,7 +172,7 @@ bin/pi-docker-ctrl status   # show status
 bin/pi-docker-ctrl shell    # shell into the container
 bin/pi-docker-ctrl exec     # run pi in the container
 bin/pi-docker-ctrl rebuild       # rebuild image from scratch + restart
-bin/pi-docker-ctrl beeper-start  # start host beeper server (port 9999)
+bin/pi-docker-ctrl beeper-start  # start host beeper server (default 127.0.0.1:9999)
 bin/pi-docker-ctrl beeper-stop   # stop host beeper server
 
 pi-docker                         # shortcut wrapper that runs pi in the container
@@ -185,6 +185,22 @@ pi-docker -p "summarize this repo"
 pi-docker --model anthropic/claude-sonnet-4
 pi-docker --mode rpc
 ```
+
+## Beeper
+
+Optional host-side HTTP server (`beeper/main.go`) that plays a sound when called. Started by `pi-docker-ctrl beeper-start`. Two env vars control access:
+
+- `BEEPER_BIND` — `host:port` to listen on. Default `127.0.0.1:9999`. Host must be an IP literal (no hostnames). Set to `0.0.0.0:9999` to expose on all interfaces.
+- `BEEPER_ALLOW` — comma-separated list of source IPs / CIDRs that may call the beeper. Default `127.0.0.0/8`. Bare IPs are normalised to `/32` (v4) / `/128` (v6). Requests from anywhere else get a `403`.
+
+For container access via `host.docker.internal`, the defaults are sufficient on Docker Desktop (it forwards to host loopback). For VPN clients or other remote access, widen both:
+
+```bash
+export BEEPER_BIND=0.0.0.0:9999
+export BEEPER_ALLOW=127.0.0.0/8,172.28.47.0/24
+```
+
+`X-Forwarded-For` is intentionally not honoured — this is a direct-connection service.
 
 ## Custom models and proxies
 
