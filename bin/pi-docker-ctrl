@@ -215,6 +215,8 @@ setup_env() {
       [[ -z "${line// /}" ]] && continue
       local key="${line%%=*}"
       local val="${line#*=}"
+      if   [[ "$val" == '"'*'"' ]]; then val="${val#\"}"; val="${val%\"}"
+      elif [[ "$val" == "'"*"'" ]]; then val="${val#\'}"; val="${val%\'}"; fi
       if [[ -z "${!key:-}" ]]; then
         export "$key=$val"
       fi
