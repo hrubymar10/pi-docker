@@ -64,11 +64,29 @@ fi
 rm -f "/tmp/pi-session-${SESSION_ID}.pid" /tmp/pi-session-cleanup-test.sh
 
 echo
-echo "═══ pi-session foreground exec ═══"
-if grep -q '^exec pi "\$@"$' scripts/pi-session.sh; then
-  ok "pi-session runs pi in the foreground"
+echo "═══ pi-session teardown wrapper ═══"
+if grep -q '^trap cleanup HUP TERM INT EXIT$' scripts/pi-session.sh \
+  && grep -q '^exec 3<&0$' scripts/pi-session.sh \
+  && grep -q '^pi "\$@" <&3 &$' scripts/pi-session.sh \
+  && grep -q '^wait "\$PI_PID" 2>/dev/null$' scripts/pi-session.sh; then
+  ok "pi-session keeps a supervising shell around pi"
 else
-  fail "pi-session missing foreground exec fix"
+  fail "pi-session missing supervising-shell teardown logic"
+fi
+
+echo
+echo "═══ detached session watchdog ═══"
+if grep -q '^_spawn_detached() {$' bin/lib/session-cleanup.sh \
+  && grep -q 'command -v setsid' bin/lib/session-cleanup.sh \
+  && grep -q 'os\.setsid()' bin/lib/session-cleanup.sh \
+  && grep -q 'POSIX qw(setsid)' bin/lib/session-cleanup.sh \
+  && grep -q '_spawn_detached ' bin/lib/session-cleanup.sh \
+  && grep -q 'sleep 0.5' bin/lib/session-cleanup.sh \
+  && grep -q 'attempt < 20' bin/lib/session-cleanup.sh \
+  && grep -q 'sleep 0.25' bin/lib/session-cleanup.sh; then
+  ok "session watchdog is detached (portable fallback ladder) and polls quickly"
+else
+  fail "session watchdog missing portable detach ladder or fast poll"
 fi
 
 echo

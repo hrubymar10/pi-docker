@@ -11,6 +11,7 @@ This is the pi sibling of [`claude-docker`](https://github.com/hrubymar10/claude
 - **Path mirroring** — `~/project` inside the container is the same path as on the host
 - **Host identity mirroring** — same username, UID, home path, and preferred shell
 - **Shared pi state** — mounts your pi agent directory, so auth, settings, sessions, prompts, skills, packages, and model config are reused
+- **Session teardown for terminal and IDE callers** — host watchdog plus in-container wrapper clean up orphaned pi processes even when the parent wrapper dies early
 - **Git safety rails** — blocks pushes to protected branches from inside the container
 - **Optional GPG import** — import signing keys into the container at startup
 - **Optional notifier hook** — mount a custom `pi-notifier` script into the container for sound/desktop notifications
