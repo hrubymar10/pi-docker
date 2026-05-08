@@ -2,8 +2,6 @@
 
 Run [pi](https://shittycodingagent.ai) inside an isolated Docker container instead of directly on your host. The container mirrors your host environment (same paths, UID, shell), so file references, sessions, `AGENTS.md`/`CLAUDE.md` discovery, and pi auth all keep working with minimal friction.
 
-This is the pi sibling of [`claude-docker`](https://github.com/hrubymar10/claude-docker): same general security model, same path-mirroring idea, but adapted to pi's config and auth model.
-
 ## Scope: what this is, what it isn't
 
 This is an **opinionated** project tuned for the way I and my colleagues work day to day. The goal is to keep the daily pi flow feeling exactly like running `pi` on the host — same paths, same git, same `docker compose` against your project's stack — while putting a soft blanket between pi and the parts of your machine you'd rather it not touch by accident.
@@ -21,6 +19,18 @@ The threat model this project does **not** address is a deliberately adversarial
 The friction trade-off goes one way on purpose: **the sandbox must not get in our way**. Standard `docker compose up`, `docker compose exec`, debugger attach, language servers, and the rest of the daily-driver workflow all work without per-project allowlists or extra config. If a hardening proposal would block a legitimate developer flow, it's out of scope for this project — even if it would close a theoretical attack path.
 
 In short: paranoia calibrated to "AI mental breakdown", not to "nation-state in your chat window".
+
+## Siblings
+
+`pi-docker` is one of several sibling projects that apply the same sandboxing model to different AI coding agents. They share the security philosophy (filtered Docker socket, path mirroring, git-push wrapper, scope above) and most of the implementation, but each is adapted to its agent's config and auth model.
+
+| Project | Wraps |
+| --- | --- |
+| [`claude-docker`](https://github.com/hrubymar10/claude-docker) | [Claude Code](https://docs.anthropic.com/en/docs/claude-code) |
+| [`codex-docker`](https://github.com/hrubymar10/codex-docker) | [OpenAI Codex CLI](https://github.com/openai/codex) |
+| [`pi-docker`](https://github.com/hrubymar10/pi-docker) (this project) | [pi](https://shittycodingagent.ai) |
+
+Pick by which agent you actually use day to day. Running more than one in parallel is fine — the containers are independent.
 
 ## Features
 
