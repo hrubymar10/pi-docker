@@ -34,6 +34,25 @@ The git wrapper blocks push only to protected branches (`main`, `master` by defa
 
 **Rationale:** This is intentional for normal feature-branch workflows.
 
+## 2a. Git wrapper bypass via direct `git-real` invocation
+
+**Status:** Accepted trade-off (paired with #3)  
+**Severity:** Low (the wrapper is a usability hint, not a security boundary)
+
+The real git binary at `/usr/libexec/git-real/git` keeps its default `0755 root:root` permissions, so the unprivileged container user can invoke it directly and skip the protected-branch check:
+
+```bash
+/usr/libexec/git-real/git push -f origin main   # bypasses the wrapper
+```
+
+We considered locking it down to `0700 root:root` and routing the wrapper through `sudo`, but that only buys partial defense (because of #3 below — `NOPASSWD: ALL` sudo lets the same caller run `sudo /usr/libexec/git-real/git push …` anyway), at the cost of friction on every git invocation.
+
+**Impact:** Force push to protected branches is possible from inside the container with whatever credentials are configured.
+
+**Rationale:** This sandbox aims to catch *bad-prompt* mistakes — e.g., pi misreading state and prompting itself to `git push` from `master` — not to defeat a deliberately adversarial pi. The wrapper covers the accidental case; the bypass requires explicit knowledge of the absolute path. See the README "Scope" section for the threat model.
+
+**Real fix:** Enforce branch protection server-side (a pre-receive hook on the upstream that rejects pushes to protected refs from this token). The in-container wrapper is best-effort.
+
 ## 3. Passwordless sudo inside container
 
 **Status:** By design  
@@ -152,7 +171,7 @@ pi process
       └─ /usr/libexec/git-real/git
 ```
 
-Each layer is defense-in-depth. Bypassing one layer still leaves the others in place.
+Each layer is defense-in-depth. Bypassing one layer still leaves the others in place. The git wrapper is **best-effort only** — see #2a — because `git-real` is callable directly by the unprivileged user and `NOPASSWD: ALL` sudo (#3) provides another path around it. Real branch protection must be enforced server-side.
 
 ## Practical advice
 
