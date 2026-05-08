@@ -8,7 +8,7 @@ This document lists known security limitations, intentional trade-offs, and esca
 
 **Status:** Open — no upstream fix available  
 **Severity:** Medium  
-**Requires:** Direct HTTP API calls via curl or another raw client
+**Requires:** Direct HTTP API calls via curl or another raw client (not exploitable via the `docker` CLI wrapper, which now also covers absolute-path invocations of `/usr/bin/docker`)
 
 The socket-proxy `allowbindmountfrom` restriction checks `HostConfig.Binds` and `HostConfig.Mounts` with `Type: "bind"`. It does **not** inspect volume driver options. An attacker can:
 
@@ -19,7 +19,8 @@ The socket-proxy `allowbindmountfrom` restriction checks `HostConfig.Binds` and 
 **Impact:** Read/write access to arbitrary host paths through the Docker API.
 
 **Mitigations in place:**
-- `scripts/docker-wrapper.sh` blocks `docker run`, `docker volume`, `docker build`, `docker cp` at the CLI layer
+- `scripts/docker-wrapper.sh` blocks `docker run`, `docker build`, `docker cp` at the CLI layer. (`docker volume` is still allowlisted; this is the residual gap exploited above.)
+- The real docker binary is at `/usr/libexec/docker-real/docker` and `/usr/bin/docker` is the wrapper, so the allowlist cannot be bypassed by invoking the binary at an absolute path.
 - Exploitation requires raw HTTP requests to `tcp://pi-filter-proxy:2375`, not normal `docker` CLI usage
 
 ## 2. Git push to feature branches and force push

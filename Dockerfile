@@ -108,12 +108,13 @@ RUN touch /this-is-pi-docker-env \
     && ln -sf /usr/local/bin/pi-notifier /usr/local/bin/claude-notifier
 
 # ── Security wrappers (replace real binaries) ─────────────────────
-RUN mkdir -p /usr/libexec/git-real && mv /usr/bin/git /usr/libexec/git-real/git
+RUN mkdir -p /usr/libexec/git-real    && mv /usr/bin/git    /usr/libexec/git-real/git \
+ && mkdir -p /usr/libexec/docker-real && mv /usr/bin/docker /usr/libexec/docker-real/docker
 COPY scripts/git-wrapper.sh /usr/bin/git
-COPY scripts/docker-wrapper.sh /usr/local/bin/docker
+COPY scripts/docker-wrapper.sh /usr/bin/docker
 COPY scripts/pi-session.sh /usr/local/bin/pi-session
 COPY scripts/entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/bin/git /usr/local/bin/docker /usr/local/bin/pi-session /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/bin/git /usr/bin/docker /usr/local/bin/pi-session /usr/local/bin/entrypoint.sh
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["sleep", "infinity"]
