@@ -58,6 +58,7 @@ test: ## Run host-side integration tests
 	@bash test/test-wrappers-mock.sh
 	@bash test/test-preflight-overrides.sh
 	@bash test/test-compose-config.sh
+	@bash test/test-git-wrapper.sh
 
 test-verbose: ## Run tests with bash -x tracing
 	@bash -x test/test-pi-docker.sh
@@ -65,6 +66,7 @@ test-verbose: ## Run tests with bash -x tracing
 	@bash -x test/test-wrappers-mock.sh
 	@bash -x test/test-preflight-overrides.sh
 	@bash -x test/test-compose-config.sh
+	@bash -x test/test-git-wrapper.sh
 
 ##@ Docker image
 
