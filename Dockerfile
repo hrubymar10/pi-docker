@@ -96,9 +96,9 @@ RUN mkdir -p "$(dirname ${HOST_HOME})" \
 ARG PI_VERSION=""
 ENV NPM_CONFIG_UPDATE_NOTIFIER=false
 RUN if [ -n "$PI_VERSION" ]; then \
-      npm install -g "@mariozechner/pi-coding-agent@${PI_VERSION}"; \
+      npm install -g --ignore-scripts "@earendil-works/pi-coding-agent@${PI_VERSION}"; \
     else \
-      npm install -g @mariozechner/pi-coding-agent; \
+      npm install -g --ignore-scripts @earendil-works/pi-coding-agent; \
     fi
 
 # ── Useful language tooling ─────────────────────────────────────

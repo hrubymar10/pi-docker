@@ -1,6 +1,6 @@
 # pi-docker
 
-Run [pi](https://shittycodingagent.ai) inside an isolated Docker container instead of directly on your host. The container mirrors your host environment (same paths, UID, shell), so file references, sessions, `AGENTS.md`/`CLAUDE.md` discovery, and pi auth all keep working with minimal friction.
+Run [pi](https://pi.dev) inside an isolated Docker container instead of directly on your host. The container mirrors your host environment (same paths, UID, shell), so file references, sessions, `AGENTS.md`/`CLAUDE.md` discovery, and pi auth all keep working with minimal friction.
 
 ## Scope: what this is, what it isn't
 
@@ -28,7 +28,7 @@ In short: paranoia calibrated to "AI mental breakdown", not to "nation-state in 
 | --- | --- |
 | [`claude-docker`](https://github.com/hrubymar10/claude-docker) | [Claude Code](https://docs.anthropic.com/en/docs/claude-code) |
 | [`codex-docker`](https://github.com/hrubymar10/codex-docker) | [OpenAI Codex CLI](https://github.com/openai/codex) |
-| [`pi-docker`](https://github.com/hrubymar10/pi-docker) (this project) | [pi](https://shittycodingagent.ai) |
+| [`pi-docker`](https://github.com/hrubymar10/pi-docker) (this project) | [pi](https://pi.dev) |
 
 Pick by which agent you actually use day to day. Running more than one in parallel is fine — the containers are independent.
 

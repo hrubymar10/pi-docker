@@ -2,7 +2,7 @@
 
 ## Project
 
-`pi-docker` runs [pi](https://shittycodingagent.ai) inside a Docker container with host path mirroring, Docker socket filtering, and a few safety rails.
+`pi-docker` runs [pi](https://pi.dev) inside a Docker container with host path mirroring, Docker socket filtering, and a few safety rails.
 
 ## Goals
 
