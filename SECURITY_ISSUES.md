@@ -79,6 +79,10 @@ The container user has `NOPASSWD: ALL` sudo access.
 - generated git credential helper scripts
 - `~/.docker/config.json` for ghcr.io auth
 
+`GITLAB_TOKEN` (when set, for the `glab` CLI) is visible the same way:
+- process environment
+- the generated git credential helper script (`~/.git-credential-gitlab`, which references `$GITLAB_TOKEN`)
+
 **Impact:** Any process already running inside the container can read them.
 
 **Mitigations:** Scope is limited to the container unless secrets are exfiltrated over the network.
