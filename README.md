@@ -41,6 +41,7 @@ Pick by which agent you actually use day to day. Running more than one in parall
 - **Shared pi state** — mounts your pi agent directory, so auth, settings, sessions, prompts, skills, packages, and model config are reused
 - **Session teardown for terminal and IDE callers** — host watchdog plus in-container wrapper clean up orphaned pi processes even when the parent wrapper dies early
 - **Git safety rails** — blocks pushes to protected branches from inside the container
+- **AWS credentials proxy** — read-only AWS SSO credentials via the shared host-side [`aws-ai-proxy`](https://github.com/hrubymar10/aws-ai-proxy)
 - **Optional GPG import** — import signing keys into the container at startup
 - **Optional notifier hook** — mount a custom `pi-notifier` script into the container for sound/desktop notifications
 - **Optional beeper helper** — host-side HTTP helper for simple sound notifications
@@ -229,6 +230,35 @@ If `SSH_AUTH_SOCK` is set on the host (i.e. an `ssh-agent` is running), `pi-dock
 4. Start (or restart) the container: `bin/pi-docker-ctrl start`.
 
 The relay starts on `pi-docker-ctrl start` and stops on `pi-docker-ctrl stop`. If `socat` isn't available on the host, the relay is skipped with a warning and the rest of the container still starts normally.
+
+## AWS Credentials (Optional)
+
+pi inside the container can use read-only AWS credentials via an independently running [`aws-ai-proxy`](https://github.com/hrubymar10/aws-ai-proxy) service. No AWS credentials are stored in the container; every request is forwarded to the proxy, which uses its active host SSO session.
+
+Configure and start [`aws-ai-proxy`](https://github.com/hrubymar10/aws-ai-proxy), then enable consumption in your shell or `config/.env`:
+
+```bash
+AWS_AI_PROXY_ENABLED=1
+AWS_AI_PROXY_URL=http://host.docker.internal:9998
+```
+
+Log in on the host first:
+
+```bash
+aws sso login --profile my-readonly
+```
+
+Then start or restart the container:
+
+```bash
+bin/pi-docker-ctrl start
+```
+
+On start, the control script fetches enabled profiles from `$AWS_AI_PROXY_URL/profiles`. If the fetch fails, the container still starts and AWS proxy profiles are skipped with a warning. Inside the container, `~/.aws/config` is generated with `credential_process` entries that call `$AWS_AI_PROXY_URL/credentials/{profile}`.
+
+### Upgrading from the legacy proxy
+
+Older docker setups may still have `AWS_CRED_PROXY_PROFILES` or `AWS_CRED_PROXY_PORT` in the process environment or `config/.env`. Those variables are ignored by the current consumer-only model. During `start` and `rebuild`, `pi-docker-ctrl` detects active legacy variables when `AWS_AI_PROXY_ENABLED` is not already enabled. In a terminal it prompts to comment active legacy lines out of `config/.env`, show migration steps, or ignore once; in non-interactive IDE/automation runs it only prints the warning and continues.
 
 ## GitLab CLI (glab) (Optional)
 

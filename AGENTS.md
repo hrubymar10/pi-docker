@@ -21,6 +21,7 @@
 - `bin/pi-docker-vscode-wrapper` — wrapper for the `pi-vscode` VS Code extension
 - `scripts/entrypoint.sh` — runtime setup inside the container
 - `beeper/` — optional host-side HTTP beep server; a sample `config/pi-notifier` can call it to play sounds from inside the container
+- `../aws-ai-proxy/` - optional independently running AWS credential proxy consumed when `AWS_AI_PROXY_ENABLED` is true (https://github.com/hrubymar10/aws-ai-proxy)
 - `scripts/pi-session.sh` — session wrapper/cleanup
 - `scripts/git-wrapper.sh` — blocks pushes to protected branches
 - `scripts/docker-wrapper.sh` — blocks dangerous Docker subcommands in-container
@@ -51,6 +52,8 @@ bin/pi-docker-ctrl beeper-stop
 - Keep pi-specific behavior in pi-specific files
 - Backward compatibility is okay, but prefer pi-first names (`pi-notifier`, `PI_*` env vars, etc.)
 - Keep `COMPOSE_PROJECT_NAME` pinned so docker resource names do not depend on the checkout directory name
+- Docker repos are AWS proxy consumers only. Use `AWS_AI_PROXY_ENABLED` and `AWS_AI_PROXY_URL`; do not add proxy lifecycle management here.
+- Legacy `AWS_CRED_PROXY_PROFILES` / `AWS_CRED_PROXY_PORT` values are ignored. `bin/pi-docker-ctrl start` and `rebuild` detect them when `AWS_AI_PROXY_ENABLED` is not truthy, prompt only on a TTY, and warn without blocking non-interactive runs.
 - Update `README.md` when behavior changes
 - Preserve exact host path mirroring semantics
 - Preserve security defaults unless explicitly changing them
