@@ -6,4 +6,3 @@ config/pi-notifier
 config/.env
 config/custom-bin/*
 !config/custom-bin/.gitkeep
-!config/custom-bin/github-ffmerge
