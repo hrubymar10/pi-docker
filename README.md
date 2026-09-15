@@ -1,3 +1,7 @@
+> [!WARNING]
+> This project is deprecated in favor of [harness-docker](https://github.com/hrubymar10/harness-docker).
+> This repository is publicly archived and read-only. See the [quick-start migration guide](https://github.com/hrubymar10/harness-docker/blob/master/docs/migration.md).
+
 # pi-docker
 
 Run [pi](https://pi.dev) inside an isolated Docker container instead of directly on your host. The container mirrors your host environment (same paths, UID, shell), so file references, sessions, `AGENTS.md`/`CLAUDE.md` discovery, and pi auth all keep working with minimal friction.
